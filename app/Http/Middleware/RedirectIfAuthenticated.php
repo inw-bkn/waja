@@ -22,6 +22,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+
+                if ($request->has('redirectAfterAuthenticated')) {
+                    return redirect($request->input('redirectAfterAuthenticated') . '&login=' . urlencode(Auth::user()->name));
+                }
+                
                 return redirect(RouteServiceProvider::HOME);
             }
         }
