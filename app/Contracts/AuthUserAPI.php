@@ -6,5 +6,5 @@ interface AuthUserAPI
 {
     public function getUser($login);
 
-    public function authenticate($creadentials);
+    public function authenticate($login, $password);
 }

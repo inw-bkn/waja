@@ -9,70 +9,81 @@ class DAISAuthUserAPI implements AuthUserAPI
 {
     public function getUser($login)
     {
-        $response = Http::withHeaders([
-                            'APPNAME' => env('DAIS_USER_APPNAME'),
-                            'APIKEY' => env('DAIS_USER_APIKEY'),
-                        ])->post(env('DAIS_USER_URL'), ['id' => $login]);
+        $headers = [
+            'APPNAME' => env('DAIS_USER_APPNAME'),
+            'APIKEY' => env('DAIS_USER_APIKEY'),
+        ];
+        $response = $this->makePost(env('DAIS_USER_URL'), ['id' => $login], $headers);
 
-        return $response->json();
-    }    
+        if (!$response['ok'] || !$response['found']) {
+            return $response;
+        }
 
-    public function authenticate($login = 'john.doe', $password = 'p@ssw0rd')
-    {
-        $response = Http::withHeaders([
-                            'APPNAME' => env('DAIS_AUTH_APPNAME'),
-                            'APIKEY' => env('DAIS_AUTH_APIKEY'),
-                        ])->post(env('DAIS_AUTH_URL'), ['name' => $login, 'pwd' => $password]);
-        return $response->json();
-        /*
-[
-     "found" => true,
-     "msg" => "Success",
-     "UserInfo" => [
-       "UserData" => [
-         "sapid" => "10022569",
-         "username" => "koramit.pic",
-         "full_name" => "นาย กรมิษฐ์ พิชนาหะรี",
-         "position" => "นักวิชาการคอมพิวเตอร์",
-         "job" => "นักวิชาการคอมพิวเตอร์",
-         "office" => "สาขาวิชาวักกะวิทยา",
-         "department" => "ภ.อายุรศาสตร์",
-         "passwordExpiredDate" => "09/12/2020 00:00:00",
-         "daysLeft" => 82,
-         "passwordNeverExpire" => false,
-         "eng_name" => "Mr. KORAMIT PICHANAHAREE",
-         "email" => "koramit.pic@mahidol.ac.th",
-         "sn" => "PICHANAHAREE",
-         "givenName" => "KORAMIT",
-         "ipPhone" => "",
-         "pager" => "",
-       ],
-       "UserToken" => [
-         "token" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImtvcmFtaXQucGljIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvc3lzdGVtIjoiU0lJVF9NRURTSUNPTiIsInJvbGUiOiIiLCJuYmYiOjE2MDA0MDk2NDMsImV4cCI6MTYwMDQyMDQ0MywiaWF0IjoxNjAwNDA5NjQzfQ.lUKWZ4CkkeOHwE_VixLkejXVDk283kScYcRMBSlVtUY",
-         "token_expire_date" => "1600420443",
-       ],
-       "siRoles" => null,
-     ],
-   ]
-        */
+        $profile = $this->getUserByOrgId($response['UserInfo']['ID']);
 
         return [
-            'reply_code' => 0,
-            'reply_text' => 'granted.',
-            'name' => $data['UserInfo']['UserData']['full_name'],
-            'username' => $data['UserInfo']['UserData']['username'],
-            'email' => $data['UserInfo']['UserData']['email'],
-            'org_id' => $data['UserInfo']['UserData']['sapid'],
-            'remark' => $data['UserInfo']['UserData']['job'] . " " . $data['UserInfo']['UserData']['office'] . " " . $data['UserInfo']['UserData']['department'],
-            'tel_no' => $data['UserInfo']['UserData']['ipPhone'],
-            'active' => 1,
-            'name_en' => $data['UserInfo']['UserData']['eng_name'],
-            'document_id' => "",
-            'org_division_id' => null,
-            'org_position_id' => null,
-            'org_division_name' => $data['UserInfo']['UserData']['department'],
-            'org_position_title' => $data['UserInfo']['UserData']['job'],
-            'password_days_left' => $data['UserInfo']['UserData']['daysLeft']
+            'ok' => true,
+            'active' => $response['isActive'],
+            'login' => $login,
+            'org_id' => $response['UserInfo']['ID'],
+            'full_name' => $response['UserInfo']['DisplayName'],
+            'document_id' => $profile['pid'],
+            'position_id' => $profile['job_key'],
+            'position_name' => $profile['job_key_desc'],
+            'division_id' => $profile['org_unit_m'],
+            'division_name' => $profile['org_unit_m_desc'],
+            'password_expires_in_days' => (int) str_replace('Password Remain(Day(s)): ', '', $response['msg']),
+            'remark' => $profile['remark'],
+        ];
+    }
+
+    public function authenticate($login, $password)
+    {
+        $headers = [
+            'APPNAME' => env('DAIS_AUTH_APPNAME'),
+            'APIKEY' => env('DAIS_AUTH_APIKEY'),
+        ];
+        $response = $this->makePost(env('DAIS_AUTH_URL'), ['name' => $login, 'pwd' => $password], $headers);
+
+        if (!$response['ok'] || !$response['found']) {
+            return $response;
+        }
+
+        $profile = $this->getUserByOrgId($response['UserInfo']['UserData']['sapid']);
+
+        return [
+            'ok' => true, // mean user is active
+            'login' => $login,
+            'org_id' => $response['UserInfo']['UserData']['sapid'],
+            'full_name' => $response['UserInfo']['UserData']['full_name'],
+            'full_name_eng' => $response['UserInfo']['UserData']['eng_name'],
+            'document_id' => $profile['pid'],
+            'position_id' => $profile['job_key'],
+            'position_name' => $profile['job_key_desc'],
+            'division_id' => $profile['org_unit_m'],
+            'division_name' => $profile['org_unit_m_desc'],
+            'office_name' => $response['UserInfo']['UserData']['office'],
+            'email' => $response['UserInfo']['UserData']['email'],
+            'password_expires_in_days' => $response['UserInfo']['UserData']['daysLeft'],
+            'remark' => $profile['remark'],
+        ];
+    }
+
+    protected function makePost($url, $data, $headers, $options = ['timeout' => 2.0])
+    {
+        $response = Http::withOptions($options)
+                        ->withHeaders($headers)
+                        ->post($url, $data);
+
+        if ($response->successful()) {
+            return $response->json() + ['ok' => true];
+        }
+
+        return [
+            'ok' => false,
+            'status' => $response->status(),
+            'error' => $response->serverError() ? 'server' : 'client',
+            'body' => $response->body(),
         ];
     }
 
@@ -94,8 +105,13 @@ class DAISAuthUserAPI implements AuthUserAPI
 
         // make request and check the response.
         if (($response = $this->executeCurl($strSOAP, $action, env('SIMHIS_AUTH_URL'))) === FALSE) {
-            return null;
-        } 
+            return [
+                'ok' => false,
+                'status' => 500,
+                'error' => 'server',
+                'body' => 'Server Error'
+            ];
+        }
 
         $response = str_replace('&#x', '', $response);
         $xml = simplexml_load_string($response);
@@ -113,11 +129,7 @@ class DAISAuthUserAPI implements AuthUserAPI
                         ->children()
                         ->GetUsers
                         ->children();
-        return $response;
-
-        foreach ($response as $key => $value) {
-            $tmp[$key] = implode("", json_decode(json_encode($value, TRUE), TRUE));
-        }
+        return ((array) $response) + ['ok' => true];
     }
 
     protected function executeCurl($strSOAP, $action, $url)
@@ -150,5 +162,5 @@ class DAISAuthUserAPI implements AuthUserAPI
 
         return $response;
     }
-    
+
 }
