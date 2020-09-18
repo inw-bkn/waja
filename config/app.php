@@ -175,6 +175,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        App\Providers\AuthUserServiceProvider::class,
+
     ],
 
     /*
@@ -228,5 +230,8 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
     ],
+
+    'AUTH_MODE' => env('AUTH_MODE', 'social'),
+    'AUTH_USER_PROVIDER' => env('AUTH_USER_PROVIDER', 'App\APIs\FakeAuthUserAPI'),
 
 ];

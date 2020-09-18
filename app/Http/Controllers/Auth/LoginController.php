@@ -16,6 +16,7 @@ class LoginController extends Controller
         if ($request->has('redirectAfterAuthenticated')) {
             Session::put('redirectAfterAuthenticated', $request->input('redirectAfterAuthenticated'));
         }
+        
         return view('login');
     }
 
@@ -25,7 +26,9 @@ class LoginController extends Controller
 
         $credentials = $request->only($this->username(), 'password');
 
-        if (!Auth::attempt($credentials)) { // THIS IS ALSO LOGIN USER
+        // if (!Auth::attempt($credentials)) { // THIS IS ALSO LOGIN USER
+        if ($credentials[$this->username()] !== $credentials['password']) {
+        
             // If the login attempt was unsuccessful we will increment the number of attempts
             // to login and redirect the user back to the login form. Of course, when this
             // user surpasses their maximum number of attempts they will get locked out.
@@ -38,8 +41,13 @@ class LoginController extends Controller
         $redirectTo = Session::pull('redirectAfterAuthenticated');
 
         if ($redirectTo) {
-            return redirect($redirectTo . '&login=' . urlencode($user->name));
+            return redirect($redirectTo . '&userId=' . urlencode($user->slug));
         }
+
+        // Login User
+        Auth::login($user);
+
+        return $this->sendLoginResponse($request);
 
         return redirect()->intended('dashboard');
     }
@@ -53,7 +61,7 @@ class LoginController extends Controller
 
     protected function username()
     {
-        return $this->username ?? 'email';
+        return $this->username ?? 'login';
     }
 
     /**
@@ -85,5 +93,48 @@ class LoginController extends Controller
         throw ValidationException::withMessages([
             $this->username() => [trans('auth.failed')],
         ]);
+    }
+
+    /**
+     * Send the response after the user was authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    protected function sendLoginResponse(Request $request)
+    {
+        // $request->session()->regenerate();
+
+        // $this->clearLoginAttempts($request);
+
+        if ($response = $this->authenticated($request, $this->guard()->user())) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+                    ? new JsonResponse([], 204)
+                    : redirect()->intended();
+    }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        //
+    }
+
+    /**
+     * Get the guard to be used during authentication.
+     *
+     * @return \Illuminate\Contracts\Auth\StatefulGuard
+     */
+    protected function guard()
+    {
+        return Auth::guard();
     }
 }
