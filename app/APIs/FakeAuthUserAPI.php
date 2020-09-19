@@ -11,39 +11,39 @@ class FakeAuthUserAPI implements AuthUserAPI
     {
         $faker = Factory::create();
         
-        if (is_numeric($login)) {
-            $gender = ($login % 2) == 0;
-        } else {
-            $gender = (strlen($login) % 2) == 0;
-            $orgId = rand(40000000, 80000000);
-        }
+        $orgId = rand(10000000, 10099999);
 
-        $name = $gender ?
+        $name = (strlen($login) % 2) === 0 ?
                     $faker->firstNameFemale . ' ' . $faker->lastName :
                     $faker->firstNameMale . ' ' . $faker->lastName;
 
         return [
-            'reply_code' => 1,
-            'reply_text' => 'OK',
+            'ok' => true,
+            'active' => true,
             'login' => $login,
-            'document_id' => $faker->ean13,
             'org_id' => $orgId,
             'full_name' => $name,
-            'full_name_en' => $name,
-            'email' => "",
-            'active' => 1,
+            'document_id' => $faker->ean13,
+            'position_id' => '',
+            'position_name' => '',
+            'division_id' => '',
+            'division_name' => '',
+            'password_expires_in_days' => 90,
             'remark' => '',
-            'position' => '',
         ];
     }
 
-    public function authenticate($credentials)
+    public function authenticate($login, $password)
     {
-        if ($credentials['password'] !== $credentials['login']) {
-            return ['reply_code' => 4, 'reply_text' => 'wrong password.'];
+        if ($password !== $login) {
+            return ['ok' => true, 'found' => false];
         }
-        $data = $this->getUser($credentials['login']);
-        $data['reply_text'] = 'granted.';
+        $data = $this->getUser($login);
+        unset($data['active']);
+        $data['full_name_eng'] = $data['full_name'];
+        $data['department_name'] = '';
+        $data['office_name'] = '';
+        $data['email'] = $data['login'] . '@waja.net';
         return $data;
     }
 }

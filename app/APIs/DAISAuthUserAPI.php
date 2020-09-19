@@ -62,6 +62,7 @@ class DAISAuthUserAPI implements AuthUserAPI
             'position_name' => $profile['job_key_desc'],
             'division_id' => $profile['org_unit_m'],
             'division_name' => $profile['org_unit_m_desc'],
+            'department_name' => $response['UserInfo']['UserData']['department'],
             'office_name' => $response['UserInfo']['UserData']['office'],
             'email' => $response['UserInfo']['UserData']['email'],
             'password_expires_in_days' => $response['UserInfo']['UserData']['daysLeft'],

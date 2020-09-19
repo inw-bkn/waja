@@ -15,6 +15,10 @@ Route::get('dashboard', function () {
     return view('dashboard');
 })->middleware('auth');
 
-Route::get('/test-api', function (App\Contracts\AuthUserAPI $api) {
-    return 'hello';
+Route::get('/test-api/user', function (App\Contracts\AuthUserAPI $api) {
+    return $api->getUser(request()->input('login'));
+});
+
+Route::get('/test-api/authenticate', function (App\Contracts\AuthUserAPI $api) {
+    return $api->authenticate(request()->input('login'), request()->input('password'));
 });
