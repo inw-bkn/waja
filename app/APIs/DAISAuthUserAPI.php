@@ -10,10 +10,10 @@ class DAISAuthUserAPI implements AuthUserAPI
     public function getUser($login)
     {
         $headers = [
-            'APPNAME' => env('DAIS_USER_APPNAME'),
-            'APIKEY' => env('DAIS_USER_APIKEY'),
+            'APPNAME' => config('app.DAIS_USER_APPNAME'),
+            'APIKEY' => config('app.DAIS_USER_APIKEY'),
         ];
-        $response = $this->makePost(env('DAIS_USER_URL'), ['id' => $login], $headers);
+        $response = $this->makePost(config('app.DAIS_USER_URL'), ['id' => $login], $headers);
 
         if (!$response['ok'] || !$response['found']) {
             return $response;
@@ -40,10 +40,10 @@ class DAISAuthUserAPI implements AuthUserAPI
     public function authenticate($login, $password)
     {
         $headers = [
-            'APPNAME' => env('DAIS_AUTH_APPNAME'),
-            'APIKEY' => env('DAIS_AUTH_APIKEY'),
+            'APPNAME' => config('app.DAIS_AUTH_APPNAME'),
+            'APIKEY' => config('app.DAIS_AUTH_APIKEY'),
         ];
-        $response = $this->makePost(env('DAIS_AUTH_URL'), ['name' => $login, 'pwd' => $password], $headers);
+        $response = $this->makePost(config('app.DAIS_AUTH_URL'), ['name' => $login, 'pwd' => $password], $headers);
 
         if (!$response['ok'] || !$response['found']) {
             return $response;
@@ -90,7 +90,7 @@ class DAISAuthUserAPI implements AuthUserAPI
 
     protected function getUserByOrgId($orgId)
     {
-        $functionname = env('SIMHIS_AUTH_FUNCNAME');
+        $functionname = config('app.SIMHIS_AUTH_FUNCNAME');
         $action = "http://tempuri.org/" . $functionname;
 
         $strSOAP  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
@@ -105,7 +105,7 @@ class DAISAuthUserAPI implements AuthUserAPI
         $strSOAP .= "</soap:Envelope>";
 
         // make request and check the response.
-        if (($response = $this->executeCurl($strSOAP, $action, env('SIMHIS_AUTH_URL'))) === FALSE) {
+        if (($response = $this->executeCurl($strSOAP, $action, config('app.SIMHIS_AUTH_URL'))) === FALSE) {
             return [
                 'ok' => false,
                 'status' => 500,
@@ -136,7 +136,7 @@ class DAISAuthUserAPI implements AuthUserAPI
     protected function executeCurl($strSOAP, $action, $url)
     {
         $headers = [
-            "Host: " . env('SIMHIS_AUTH_HOST'),
+            "Host: " . config('app.SIMHIS_AUTH_HOST'),
             "Content-Type: text/xml; charset=utf-8",
             "SOAPAction: \"" . $action . "\"",
             "Transfer-Encoding: chunked",
@@ -152,7 +152,7 @@ class DAISAuthUserAPI implements AuthUserAPI
         curl_setopt($ch, CURLOPT_POSTFIELDS, $strSOAP);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
-        curl_setopt($ch, CURLOPT_USERPWD, env('SIMHIS_SERVER_USERNAME') . ":" . env('SIMHIS_SERVER_PASSWORD'));
+        curl_setopt($ch, CURLOPT_USERPWD, config('app.SIMHIS_SERVER_USERNAME') . ":" . config('app.SIMHIS_SERVER_PASSWORD'));
 
         $response = curl_exec($ch);
         curl_close($ch);
