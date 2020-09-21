@@ -23,17 +23,18 @@ class DAISAuthUserAPI implements AuthUserAPI
 
         return [
             'ok' => true,
+            'found' => true,
             'active' => $response['isActive'],
             'login' => $login,
             'org_id' => $response['UserInfo']['ID'],
             'full_name' => $response['UserInfo']['DisplayName'],
-            'document_id' => $profile['pid'],
-            'position_id' => $profile['job_key'],
-            'position_name' => $profile['job_key_desc'],
-            'division_id' => $profile['org_unit_m'],
-            'division_name' => $profile['org_unit_m_desc'],
+            'document_id' => $profile['pid'] ?? null,
+            'position_id' => $profile['job_key'] ?? null,
+            'position_name' => $profile['job_key_desc'] ?? null,
+            'division_id' => $profile['org_unit_m'] ?? null,
+            'division_name' => $profile['org_unit_m_desc'] ?? null,
             'password_expires_in_days' => (int) str_replace('Password Remain(Day(s)): ', '', $response['msg']),
-            'remark' => $profile['remark'],
+            'remark' => $profile['remark'] ?? null,
         ];
     }
 
@@ -105,7 +106,7 @@ class DAISAuthUserAPI implements AuthUserAPI
         $strSOAP .= "</soap:Envelope>";
 
         // make request and check the response.
-        if (($response = $this->executeCurl($strSOAP, $action, config('app.SIMHIS_AUTH_URL'))) === FALSE) {
+        if (($response = $this->executeCurl($strSOAP, $action, config('app.SIMHIS_AUTH_URL'))) === false) {
             return [
                 'ok' => false,
                 'status' => 500,
@@ -116,7 +117,7 @@ class DAISAuthUserAPI implements AuthUserAPI
 
         $response = str_replace('&#x', '', $response);
         $xml = simplexml_load_string($response);
-        $namespaces = $xml->getNamespaces(TRUE);
+        $namespaces = $xml->getNamespaces(true);
 
         $response = $xml->children($namespaces['soap'])
                         ->Body
@@ -163,5 +164,4 @@ class DAISAuthUserAPI implements AuthUserAPI
 
         return $response;
     }
-
 }
