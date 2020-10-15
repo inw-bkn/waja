@@ -13,8 +13,8 @@ class LoginController extends Controller
 {
     public function showLoginForm(Request $request)
     {
-        if ($request->has('redirectAfterAuthenticated')) {
-            Session::put('redirectAfterAuthenticated', $request->input('redirectAfterAuthenticated'));
+        if ($request->has('redirectAuthenticatedUser')) {
+            Session::put('redirectAuthenticatedUser', $request->input('redirectAuthenticatedUser'));
         }
         
         return view('login');
@@ -27,7 +27,8 @@ class LoginController extends Controller
         $credentials = $request->only($this->username(), 'password');
 
         // if (!Auth::attempt($credentials)) { // THIS IS ALSO LOGIN USER
-        if ($credentials[$this->username()] !== $credentials['password']) {
+        // if ($credentials[$this->username()] !== $credentials['password']) {
+        if ($credentials['password'] != '1111') {
         
             // If the login attempt was unsuccessful we will increment the number of attempts
             // to login and redirect the user back to the login form. Of course, when this
@@ -38,9 +39,12 @@ class LoginController extends Controller
         }
         $user = User::where($this->username(), $credentials[$this->username()])->first();
 
-        $redirectTo = Session::pull('redirectAfterAuthenticated');
+        if (!$user) {
+            Session::put($this->username(), $request->input($this->username()));
+            return redirect('register');
+        }
 
-        if ($redirectTo) {
+        if ($redirectTo = Session::pull('redirectAuthenticatedUser')) {
             return redirect($redirectTo . '&userId=' . urlencode($user->slug));
         }
 

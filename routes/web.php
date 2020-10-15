@@ -1,11 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return Inertia::render('Welcome', []);
+});
+Route::get('/about', function () {
+    sleep(2);
+    return Inertia::render('About', []);
 });
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->middleware('guest')->name('login');
@@ -14,6 +20,9 @@ Route::post('logout', [LoginController::class, 'logout'])->middleware('auth');
 Route::get('dashboard', function () {
     return view('dashboard');
 })->middleware('auth');
+
+Route::get('register', [RegisterController::class, 'showRegisterForm'])->middleware('guest')->name('register');
+Route::post('register', [RegisterController::class, 'register'])->middleware('guest')->name('register.post');
 
 Route::get('/test-api/user', function (App\Contracts\AuthUserAPI $api) {
     return $api->getUser(request()->input('login'));

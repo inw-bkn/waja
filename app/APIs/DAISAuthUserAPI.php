@@ -28,12 +28,12 @@ class DAISAuthUserAPI implements AuthUserAPI
             'login' => $login,
             'org_id' => $response['UserInfo']['ID'],
             'full_name' => $response['UserInfo']['DisplayName'],
-            'document_id' => $profile['pid'] ?? null,
+            // 'document_id' => $profile['pid'] ?? null,
             'position_id' => $profile['job_key'] ?? null,
             'position_name' => $profile['job_key_desc'] ?? null,
             'division_id' => $profile['org_unit_m'] ?? null,
             'division_name' => $profile['org_unit_m_desc'] ?? null,
-            'password_expires_in_days' => (int) str_replace('Password Remain(Day(s)): ', '', $response['msg']),
+            'password_expires_in_days' => (int) str_replace('Password Remain(Day(s)): ', '', $response['body']),
             'remark' => $profile['remark'] ?? null,
         ];
     }
@@ -54,31 +54,39 @@ class DAISAuthUserAPI implements AuthUserAPI
 
         return [
             'ok' => true, // mean user is active
+            'found' => true,
             'login' => $login,
             'org_id' => $response['UserInfo']['UserData']['sapid'],
             'full_name' => $response['UserInfo']['UserData']['full_name'],
-            'full_name_eng' => $response['UserInfo']['UserData']['eng_name'],
-            'document_id' => $profile['pid'],
-            'position_id' => $profile['job_key'],
-            'position_name' => $profile['job_key_desc'],
-            'division_id' => $profile['org_unit_m'],
-            'division_name' => $profile['org_unit_m_desc'],
+            'full_name_en' => $response['UserInfo']['UserData']['eng_name'],
+            // 'document_id' => $profile['pid'] ?? null,
+            'position_id' => $profile['job_key'] ?? null,
+            'position_name' => $profile['job_key_desc'] ?? null,
+            'division_id' => $profile['org_unit_m'] ?? null,
+            'division_name' => $profile['org_unit_m_desc'] ?? null,
             'department_name' => $response['UserInfo']['UserData']['department'],
             'office_name' => $response['UserInfo']['UserData']['office'],
             'email' => $response['UserInfo']['UserData']['email'],
             'password_expires_in_days' => $response['UserInfo']['UserData']['daysLeft'],
-            'remark' => $profile['remark'],
+            'remark' => $profile['remark'] ?? null,
         ];
     }
 
-    protected function makePost($url, $data, $headers, $options = ['timeout' => 2.0])
+    protected function makePost($url, $data, $headers, $options = ['timeout' => 5.0])
     {
         $response = Http::withOptions($options)
                         ->withHeaders($headers)
                         ->post($url, $data);
 
         if ($response->successful()) {
-            return $response->json() + ['ok' => true];
+            $data = $response->json() + ['ok' => true];
+            if (isset($data['msg'])) {
+                $data['body'] = $data['msg'];
+                unset($data['msg']);
+            } else {
+                $data['body'] = null;
+            }
+            return $data;
         }
 
         return [
@@ -147,7 +155,7 @@ class DAISAuthUserAPI implements AuthUserAPI
         $ch = curl_init();
         // curl_setopt($ch, CURLOPT_VERBOSE, true); // for debug
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 2); // set connection timeout.
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // set connection timeout.
         curl_setopt($ch, CURLOPT_POST, TRUE);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $strSOAP);
