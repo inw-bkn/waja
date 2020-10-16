@@ -30,4 +30,28 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'google' => [
+        'client_id'     => env('GOOGLE_OAUTH_ID'),
+        'client_secret' => env('GOOGLE_OAUTH_SECRET'),
+        'redirect'      => env('GOOGLE_OAUTH_REDIRECT'),
+    ],
+
+    'facebook' => [
+        'client_id'     => env('FACEBOOK_OAUTH_ID'),
+        'client_secret' => env('FACEBOOK_OAUTH_SECRET'),
+        'redirect'      => env('FACEBOOK_OAUTH_REDIRECT'),
+    ],
+
+    'github' => [
+        'client_id'     => env('GITHUB_OAUTH_ID'),
+        'client_secret' => env('GITHUB_OAUTH_SECRET'),
+        'redirect'      => env('GITHUB_OAUTH_REDIRECT'),
+    ],
+
+    'twitter' => [
+        'client_id'     => env('TWITTER_OAUTH_ID'),
+        'client_secret' => env('TWITTER_OAUTH_SECRET'),
+        'redirect'      => env('TWITTER_OAUTH_REDIRECT'),
+    ],
+
 ];
