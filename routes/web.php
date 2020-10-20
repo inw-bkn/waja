@@ -16,6 +16,9 @@ Route::get('/about', function () {
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->middleware('guest')->name('login');
 Route::post('login', [LoginController::class, 'login'])->middleware('guest');
+Route::get('auth/telegram', function () { return view('telegram-auth'); });
+Route::get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
+Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
 Route::post('logout', [LoginController::class, 'logout'])->middleware('auth');
 Route::get('dashboard', function () {
     return view('dashboard');

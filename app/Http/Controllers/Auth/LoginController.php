@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\APIs\LINEAuthUserAPI;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -17,7 +21,8 @@ class LoginController extends Controller
             Session::put('redirectAuthenticatedUser', $request->input('redirectAuthenticatedUser'));
         }
         
-        return view('login');
+        // return view('login');
+        return Inertia::render('Auth/Login');
     }
 
     public function login(Request $request)
@@ -140,5 +145,61 @@ class LoginController extends Controller
     protected function guard()
     {
         return Auth::guard();
+    }
+
+    /**
+     * Redirect the user to the GitHub authentication page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function redirectToProvider($provider)
+    {
+        return $provider === 'line' ? LINEAuthUserAPI::redirect() : Socialite::driver($provider)->redirect();
+    }
+
+    /**
+     * Obtain the user information from GitHub.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function handleProviderCallback($provider, Request $request)
+    {
+        if ($provider === 'telegram') {
+            return $request->all();
+        }
+
+        $socialUser = $provider === 'line' ? new LINEAuthUserAPI($request) : Socialite::driver($provider)->user();
+
+        return [
+            'provider' => $provider,
+            'id' => $socialUser->getId(),
+            'name' => $socialUser->getName(),
+            'email' => $socialUser->getEmail(),
+            'avatar' => $socialUser->getAvatar(),
+            'nickname' => $socialUser->getNickname(),
+        ];
+
+        return $socialUser->getName();
+
+        // check existing user
+        // $user = User::findSocialAccount($provider, $socialUser->getId())->first();
+        
+        // if (!$user) {
+        //     Session::put('social', [
+        //         'provider' => $provider,
+        //         'id' => $socialUser->getId(),
+        //         'email' => $socialUser->getEmail(),
+        //         'name' => $socialUser->getName(),
+        //         'email' => $socialUser->getEmail(),
+        //         'avatar' => $socialUser->getAvatar(),
+        //         'nickname' => $socialUser->getNickname(),
+        //     ]);
+        //     return Redirect::route('register');
+        // }
+
+        // $user->setSocialAccount($provider, $socialUser);
+
+        // Auth::guard()->login($user, true);
+        // return $this->sendLoginResponse($request);
     }
 }
