@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\APIs\LINEAuthUserAPI;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -152,8 +154,7 @@ class LoginController extends Controller
      */
     public function redirectToProvider($provider)
     {
-        // return Socialite::driver('github')->redirect();
-        return Socialite::driver($provider)->redirect();
+        return $provider === 'line' ? LINEAuthUserAPI::redirect() : Socialite::driver($provider)->redirect();
     }
 
     /**
@@ -163,18 +164,20 @@ class LoginController extends Controller
      */
     public function handleProviderCallback($provider, Request $request)
     {
-        // $user = Socialite::driver('github')->user();
-        $socialUser = Socialite::driver($provider)->user();
+        if ($provider === 'telegram') {
+            return $request->all();
+        }
+
+        $socialUser = $provider === 'line' ? new LINEAuthUserAPI($request) : Socialite::driver($provider)->user();
 
         return [
-                'provider' => $provider,
-                'id' => $socialUser->getId(),
-                'email' => $socialUser->getEmail(),
-                'name' => $socialUser->getName(),
-                'email' => $socialUser->getEmail(),
-                'avatar' => $socialUser->getAvatar(),
-                'nickname' => $socialUser->getNickname(),
-            ];
+            'provider' => $provider,
+            'id' => $socialUser->getId(),
+            'name' => $socialUser->getName(),
+            'email' => $socialUser->getEmail(),
+            'avatar' => $socialUser->getAvatar(),
+            'nickname' => $socialUser->getNickname(),
+        ];
 
         return $socialUser->getName();
 
