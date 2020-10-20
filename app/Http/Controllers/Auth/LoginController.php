@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\APIs\LINEAuthUserAPI;
+use App\APIs\TelegramAuthUserAPI;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,7 +23,11 @@ class LoginController extends Controller
         }
         
         // return view('login');
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'configs' => [
+                'telegram' => config('services.telegram')
+            ]
+        ]);
     }
 
     public function login(Request $request)
@@ -154,7 +159,13 @@ class LoginController extends Controller
      */
     public function redirectToProvider($provider)
     {
-        return $provider === 'line' ? LINEAuthUserAPI::redirect() : Socialite::driver($provider)->redirect();
+        if ($provider === 'line') {
+            return LINEAuthUserAPI::redirect();
+        } elseif ($provider === 'telegram') {
+            return TelegramAuthUserAPI::redirect();
+        } else {
+            return Socialite::driver($provider)->redirect();
+        }
     }
 
     /**
@@ -164,11 +175,13 @@ class LoginController extends Controller
      */
     public function handleProviderCallback($provider, Request $request)
     {
-        if ($provider === 'telegram') {
-            return $request->all();
+        if ($provider === 'line') {
+            $socialUser = new LINEAuthUserAPI();
+        } elseif ($provider === 'telegram') {
+            $socialUser = new TelegramAuthUserAPI();
+        } else {
+            $socialUser = Socialite::driver($provider)->user();
         }
-
-        $socialUser = $provider === 'line' ? new LINEAuthUserAPI($request) : Socialite::driver($provider)->user();
 
         return [
             'provider' => $provider,
