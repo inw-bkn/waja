@@ -1,10 +1,9 @@
 <?php
-
 namespace App\APIs;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 
 class LINEAuthUserAPI
@@ -27,36 +26,49 @@ class LINEAuthUserAPI
         return Redirect::to($url);
     }
     
-    public function __construct(Request $request)
+    public function __construct()
     {
-        // access denied NOT IMPLEMENT YET
-        if ($request->has('error') || !$request->has('code')) {
-            return 'error';
+        // access denied
+        if (Request::has('error')) {
+            Log::error('LINE LOGIN: access denied or error => ' . Request::input('error_description'));
+            return;
         }
 
-        // access granted
+        // response error
+        if (!Request::has('code')) {
+            Log::error('LINE LOGIN: Callback response error');
+            return;
+        }
+
+        // access granted then fetch access token
         $response = Http::asForm()->post('https://api.line.me/oauth2/v2.1/token', [
             'grant_type' => 'authorization_code',
-            'code' => $request->code,
+            'code' => Request::input('code'),
             'redirect_uri' => config('services.line.redirect'),
             'client_id' => config('services.line.client_id'),
             'client_secret' => config('services.line.client_secret'),
         ]);
 
         if (!$response->successful()) {
-            return 'error';
+            Log::error('LINE LOGIN: fetch acces token error => ' . $response->body());
+            return;
         }
 
-        $profile = explode('.', $response->json()['id_token'])[1]; // JWT body
+        $profile = explode('.', $response->json()['id_token'])[1]; // => JWT body
         $profile = json_decode(base64_decode($profile), true);
         $this->name = $profile['name'] ?? null;
         $this->email = $profile['email'] ?? null;
         $this->avatar = $profile['picture'] ?? null;
 
-        // get profile again
+        // fetch profile for other stuffs
         $response = Http::withToken($response->json()['access_token'])->get('https://api.line.me/v2/profile');
-        $profile = $response->json();
 
+        if (!$response->successful()) {
+            Log::error('LINE LOGIN: fetch profile error => ' . $response->body());
+            return;
+        }
+
+        $profile = $response->json();
         $this->id = $profile['userId'];
         $this->nickname = $profile['displayName'] ?? null;
         $this->status = $profile['statusMessage'] ?? null;
