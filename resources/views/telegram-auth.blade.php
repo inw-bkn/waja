@@ -7,6 +7,6 @@
     <title></title>
 </head>
 <body>
-    <script async src="https://telegram.org/js/telegram-widget.js?12" data-telegram-login="WAJALogYouInBot" data-size="large" data-userpic="false" data-radius="3" data-auth-url="http://waja.test/auth/telegram/callback"></script>
+    <script async src="https://telegram.org/js/telegram-widget.js?12" data-telegram-login="{{ env('telegram_bot') }}" data-size="large" data-userpic="false" data-radius="3" data-auth-url="{{ env('telegram_callback') }}"></script>
 </body>
 </html>
