@@ -1,7 +1,7 @@
 <template>
-<div class="fixed inset-0 bg-blue-500 flex justify-center items-center">
-    <div class="w-full max-w-xs bg-gray-200 p-4 rounded-sm shadow-sm relative" ref="social">
-        <h1 class="text-2xl text-center text-gray-700">PLEASE LOG IN</h1>
+<div class="fixed inset-0 flex justify-center items-center bg-pattern">
+    <div class="w-full max-w-xs bg-gray-200 p-4 rounded-sm shadow-sm relative">
+        <h1 class="text-2xl font-semibold text-center text-gray-700">PLEASE LOG IN</h1>
         <a
             :href="`${$page.props.app.baseUrl}/auth/google`"
             class="flex justify-center items-center mt-8 cursor-pointer block w-full rounded-sm shadow-sm bg-red-600 text-center text-gray-100 p-2"
@@ -45,36 +45,17 @@ export default {
 components: { IconFacebook, IconGithub, IconGoogle, IconLine, IconTwitter },
 props: ["configs"],
 mounted () {
-    //<script async src="https://telegram.org/js/telegram-widget.js?12" data-telegram-login="WAJALogYouInBot" data-size="medium" data-radius="5" data-auth-url="http://waja.test/auth/telegram/callback">
-    // create script with given params
     const script = document.createElement('script')
     script.async = true
     script.src = "https://telegram.org/js/telegram-widget.js?12"
-    script.setAttribute('data-size', "large")
-    // script.setAttribute('data-userpic', this.userpic)
+    script.setAttribute("data-size", "large")
     script.setAttribute("data-userpic", false)
-    script.setAttribute('data-telegram-login', this.configs.telegram.client_id)
-    // script.setAttribute('data-request-access', this.requestAccess)
+    script.setAttribute("data-userpic", false)
+    script.setAttribute("data-telegram-login", this.configs.telegram.client_id)
+    script.setAttribute("data-request-access", null)
     script.setAttribute('data-radius', "0")
-    // if (this.radius) { script.setAttribute('data-radius', "5") }
     script.setAttribute('data-auth-url', this.configs.telegram.redirect)
-    // if (this.mode === 'callback') {
-    //     window.onTelegramAuth = this.onTelegramAuth
-    //     script.setAttribute('data-onauth', 'window.onTelegramAuth(user)')
-    // } else {
-    //     script.setAttribute('data-auth-url', this.redirectUrl)
-    // }
-    // window.onTelegramAuth = this.onTelegramAuth
-    // script.setAttribute("data-onauth", "window.onTelegramAuth(user)")
-    // script.setAttribute("data-auth-url", "http://waja.test/auth/telegram/callback")
-    
     this.$refs.telegram.appendChild(script)
-},
-methods: {
-    onTelegramAuth (user) {
-        // this.$emit('callback', user)
-        console.log(user)
-    }
 },
 }
 </script>
