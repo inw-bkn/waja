@@ -9,14 +9,9 @@ use App\Http\Controllers\Auth\RegisterController;
 Route::get('/', function () {
     return Inertia::render('Welcome', []);
 });
-Route::get('/about', function () {
-    sleep(2);
-    return Inertia::render('About', []);
-});
 
 Route::get('login', [LoginController::class, 'showLoginForm'])->middleware('guest')->name('login');
 Route::post('login', [LoginController::class, 'login'])->middleware('guest');
-Route::get('auth/telegram', function () { return view('telegram-auth'); });
 Route::get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
 Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
 Route::post('logout', [LoginController::class, 'logout'])->middleware('auth');
