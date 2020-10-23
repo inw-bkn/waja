@@ -2,7 +2,7 @@
 
 namespace App\APIs;
 
-use Illuminate\Support\Facades\Log;
+use Exception;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 
@@ -38,13 +38,11 @@ class TelegramAuthUserAPI
         $hash = hash_hmac('sha256', $dataCheckStr, $secretKey);
         
         if (strcmp($hash, $checkHash) !== 0) {
-            Log::error('TELEGRAM LOGIN: Data is NOT from Telegram');
-            return;
+            throw new Exception('TELEGRAM LOGIN: Data is NOT from Telegram');
         }
         
         if ((time() - $data['auth_date']) > 86400) {
-            Log::error('TELEGRAM LOGIN: Data is outdated');
-            return;
+            throw new Exception('TELEGRAM LOGIN: Data is outdated');
         }
         $this->id = $data['id'];
         $this->name = $data['first_name'] ?? '' . $data['last_name'] ?? '';

@@ -1,6 +1,7 @@
 <?php
 namespace App\APIs;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
@@ -28,16 +29,12 @@ class LINEAuthUserAPI
     
     public function __construct()
     {
-        // access denied
         if (Request::has('error')) {
-            Log::error('LINE LOGIN: access denied or error => ' . Request::input('error_description'));
-            return;
+            throw new Exception('LINE LOGIN: access denied => ' . Request::input('error_description'));
         }
 
-        // response error
         if (!Request::has('code')) {
-            Log::error('LINE LOGIN: Callback response error');
-            return;
+            throw new Exception('LINE LOGIN: Callback response error');
         }
 
         // access granted then fetch access token
@@ -50,8 +47,7 @@ class LINEAuthUserAPI
         ]);
 
         if (!$response->successful()) {
-            Log::error('LINE LOGIN: fetch acces token error => ' . $response->body());
-            return;
+            throw new Exception('LINE LOGIN: fetch acces token error => ' . $response->body());
         }
 
         $profile = explode('.', $response->json()['id_token'])[1]; // => JWT body
@@ -60,12 +56,11 @@ class LINEAuthUserAPI
         $this->email = $profile['email'] ?? null;
         $this->avatar = $profile['picture'] ?? null;
 
-        // fetch profile for other stuffs
+        // fetch profile for other users stuffs
         $response = Http::withToken($response->json()['access_token'])->get('https://api.line.me/v2/profile');
 
         if (!$response->successful()) {
-            Log::error('LINE LOGIN: fetch profile error => ' . $response->body());
-            return;
+            throw new Exception('LINE LOGIN: fetch profile error => ' . $response->body());
         }
 
         $profile = $response->json();
