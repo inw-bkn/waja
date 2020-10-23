@@ -60,4 +60,10 @@ return [
         'redirect'      => env('LINE_CLIENT_REDIRECT'),
     ],
 
+    'telegram' => [
+        'client_id'     => env('TELEGRAM_CLIENT_ID'),
+        'client_secret' => env('TELEGRAM_CLIENT_SECRET'),
+        'redirect'      => env('TELEGRAM_CLIENT_REDIRECT'),
+    ],
+
 ];

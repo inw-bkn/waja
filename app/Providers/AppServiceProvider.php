@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -55,11 +56,11 @@ class AppServiceProvider extends ServiceProvider
             //         'data' => Session::get('data'),
             //     ];
             // },
-            // 'errors' => function () {
-            //     return Session::get('errors') ?
-            //             Session::get('errors')->getBag('default')->getMessages() :
-            //             (object) [];
-            // },
+            'errors' => function () {
+                return Session::get('errors') ?
+                        Session::get('errors')->getBag('default')->getMessages() :
+                        (object) [];
+            },
         ]);
     }
 }
