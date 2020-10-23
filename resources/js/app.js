@@ -1,3 +1,7 @@
+window.axios = require("axios")
+
+window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
+
 import { app, plugin } from '@inertiajs/inertia-vue'
 import { InertiaProgress } from '@inertiajs/progress'
 import Vue from 'vue'

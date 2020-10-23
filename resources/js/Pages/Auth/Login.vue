@@ -1,7 +1,7 @@
 <template>
 <div class="fixed inset-0 flex justify-center items-center bg-pattern">
-    <div class="w-full max-w-xs bg-gray-200 p-4 rounded-sm shadow-sm relative">
-        <h1 class="text-2xl font-semibold text-center text-gray-700">PLEASE LOG IN</h1>
+    <div class="w-full max-w-xs bg-gray-100 p-4 rounded-sm shadow-sm relative">
+        <h1 class="text-2xl font-semibold text-center text-gray-700">โปรดลงชื่อเข้าใช้งาน</h1>
         <a
             :href="`${$page.props.app.baseUrl}/auth/google`"
             class="flex justify-center items-center mt-8 cursor-pointer block w-full rounded-sm shadow-sm bg-red-600 text-center text-gray-100 p-2"

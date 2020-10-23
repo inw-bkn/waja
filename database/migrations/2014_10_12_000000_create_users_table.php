@@ -16,20 +16,21 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->uuid('slug');
-            $table->string('login')->unique();
             $table->string('name')->unique();
+            $table->string('email')->nullable()->index();
             $table->string('password')->nullable();
-            $table->json('profile')->nullable();
+            $table->json('profile');
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();
         });
 
-        $u = new \App\Models\User();
-        $u->login = 'ko@ko.ko';
-        $u->name = 'koko';
-        $u->slug = \Str::uuid()->toString();
-        $u->save();
+        // $u = new \App\Models\User();
+        // $u->login = 'ko@ko.ko';
+        // $u->name = 'koko';
+        // $u->slug = \Str::uuid()->toString();
+        // $u->save();
     }
 
     /**

@@ -6,8 +6,10 @@ use App\APIs\LINEAuthUserAPI;
 use App\APIs\TelegramAuthUserAPI;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +24,6 @@ class LoginController extends Controller
             Session::put('redirectAuthenticatedUser', $request->input('redirectAuthenticatedUser'));
         }
         
-        // return view('login');
         return Inertia::render('Auth/Login', [
             'configs' => [
                 'telegram' => config('services.telegram')
@@ -61,7 +62,7 @@ class LoginController extends Controller
         // Login User
         Auth::login($user);
 
-        return $this->sendLoginResponse($request);
+        // return $this->sendLoginResponse($request);
 
         return redirect()->intended('dashboard');
     }
@@ -175,44 +176,43 @@ class LoginController extends Controller
      */
     public function handleProviderCallback($provider, Request $request)
     {
-        if ($provider === 'line') {
-            $socialUser = new LINEAuthUserAPI();
-        } elseif ($provider === 'telegram') {
-            $socialUser = new TelegramAuthUserAPI();
-        } else {
-            $socialUser = Socialite::driver($provider)->user();
+        try {
+            if ($provider === 'line') {
+                $user = new LINEAuthUserAPI();
+            } elseif ($provider === 'telegram') {
+                $user = new TelegramAuthUserAPI();
+            } else {
+                $user = Socialite::driver($provider)->user();
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return Redirect::route('login'); // SHOULD return WITH NOTICE USER about ERROR
         }
 
-        return [
+        $userExist = User::where('profile->social->provider', $provider)
+                         ->where('profile->social->id', $user->getId())
+                         ->first();
+
+        if ($userExist) {
+            // UPDATE USER SOCIAL PROFILE NOT YET IMPLEMENT
+            
+            if ($redirectTo = Session::pull('redirectAuthenticatedUser')) {
+                return Inertia::location($redirectTo . '&userId=' . urlencode($userExist->slug));
+            }
+
+            Auth::login($userExist);
+            return Redirect::intended('dashboard');
+        }
+
+        Session::put('user_social_profile', [
             'provider' => $provider,
-            'id' => $socialUser->getId(),
-            'name' => $socialUser->getName(),
-            'email' => $socialUser->getEmail(),
-            'avatar' => $socialUser->getAvatar(),
-            'nickname' => $socialUser->getNickname(),
-        ];
-
-        return $socialUser->getName();
-
-        // check existing user
-        // $user = User::findSocialAccount($provider, $socialUser->getId())->first();
-        
-        // if (!$user) {
-        //     Session::put('social', [
-        //         'provider' => $provider,
-        //         'id' => $socialUser->getId(),
-        //         'email' => $socialUser->getEmail(),
-        //         'name' => $socialUser->getName(),
-        //         'email' => $socialUser->getEmail(),
-        //         'avatar' => $socialUser->getAvatar(),
-        //         'nickname' => $socialUser->getNickname(),
-        //     ]);
-        //     return Redirect::route('register');
-        // }
-
-        // $user->setSocialAccount($provider, $socialUser);
-
-        // Auth::guard()->login($user, true);
-        // return $this->sendLoginResponse($request);
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'avatar' => $user->getAvatar(),
+            'nickname' => $user->getNickname(),
+        ]);
+            
+        return Redirect::route('register');
     }
 }
