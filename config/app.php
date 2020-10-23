@@ -230,20 +230,4 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
     ],
-
-    'AUTH_MODE' => env('AUTH_MODE', 'social'),
-    'AUTH_USER_PROVIDER' => env('AUTH_USER_PROVIDER', 'App\APIs\FakeAuthUserAPI'),
-
-    'DAIS_USER_APPNAME' => env('DAIS_USER_APPNAME'),
-    'DAIS_USER_APIKEY' => env('DAIS_USER_APIKEY'),
-    'DAIS_USER_URL' => env('DAIS_USER_URL'),
-    'DAIS_AUTH_APPNAME' => env('DAIS_AUTH_APPNAME'),
-    'DAIS_AUTH_APIKEY' => env('DAIS_AUTH_APIKEY'),
-    'DAIS_AUTH_URL' => env('DAIS_AUTH_URL'),
-    'SIMHIS_AUTH_FUNCNAME' => env('SIMHIS_AUTH_FUNCNAME'),
-    'SIMHIS_AUTH_URL' => env('SIMHIS_AUTH_URL'),
-    'SIMHIS_AUTH_HOST' => env('SIMHIS_AUTH_HOST'),
-    'SIMHIS_SERVER_USERNAME' => env('SIMHIS_SERVER_USERNAME'),
-    'SIMHIS_SERVER_PASSWORD' => env('SIMHIS_SERVER_PASSWORD'),
-
 ];
