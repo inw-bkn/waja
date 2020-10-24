@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
@@ -39,16 +40,16 @@ class AppServiceProvider extends ServiceProvider
                 //     return (new Agent())->isDesktop();
                 // }
             ],
-            // 'auth' => function () {
-            //     return Auth::user() ? [
-            //             'user' => [
-            //                 'id' => Auth::user()->id,
-            //                 'name' => Auth::user()->name,
-            //                 'roles' => Auth::user()->rolesName(),
-            //                 'abilities' => Auth::user()->abilities(),
-            //             ]
-            //         ]:null;
-            // },
+            'auth' => function () {
+                return Auth::user() ? [
+                        'user' => [
+                            'id' => Auth::user()->id,
+                            'name' => Auth::user()->name,
+                            'roles' => Auth::user()->rolesName(),
+                            'abilities' => Auth::user()->abilities(),
+                        ]
+                    ]:null;
+            },
             // 'flash' => function () {
             //     return [
             //         'success' => Session::get('success'),

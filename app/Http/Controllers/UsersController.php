@@ -9,11 +9,6 @@ class UsersController extends Controller
 {
     public function profile()
     {
-        return Inertia::render('Users/Profile');
-    }
-
-    public function dashboard()
-    {
-        return Inertia::render('Users/Dashboard');
+        return Inertia::render('Profile');
     }
 }

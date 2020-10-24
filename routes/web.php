@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\AssignRootController;
+use App\Http\Controllers\DevelopersController;
 use App\Http\Controllers\UsersController;
 
 // Pages
@@ -12,24 +14,24 @@ Route::get('/', function () {
 });
 
 // Register users
-Route::get('register', [RegisterController::class, 'showRegisterForm'])->middleware('guest')->name('register');
-Route::post('register', [RegisterController::class, 'register'])->middleware('guest');
+Route::middleware('guest')->get('register', [RegisterController::class, 'showRegisterForm'])->name('register');
+Route::middleware('guest')->post('register', [RegisterController::class, 'register']);
 
 // Authenticate Users
-Route::get('login', [LoginController::class, 'showLoginForm'])->middleware('guest')->name('login');
-Route::post('login', [LoginController::class, 'login'])->middleware('guest');
-Route::get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
-Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
-Route::post('logout', [LoginController::class, 'logout'])->middleware('auth');
+Route::middleware('guest')->get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::middleware('guest')->post('login', [LoginController::class, 'login']);
+Route::middleware('guest')->get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
+Route::middleware('guest')->get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
+Route::middleware('auth')->post('logout', [LoginController::class, 'logout']);
 
 // User features
-Route::get('profile', [UsersController::class, 'profile'])->middleware('auth')->name('profile');
-Route::get('dashboard', [UsersController::class, 'dashboard'])->middleware('auth')->name('dashboard');
+Route::middleware('auth')->get('profile', [UsersController::class, 'profile'])->name('profile');
+// Route::middleware('auth')->get('dashboard', [UsersController::class, 'dashboard'])->name('dashboard');
 
-Route::get('/test-api/user', function (App\Contracts\AuthUserAPI $api) {
-    return $api->getUser(request()->input('login'));
-});
+// Developer features
+Route::middleware('auth')->get('developer', [DevelopersController::class, 'developer'])->name('developer');
+Route::middleware('auth')->post('developer', [DevelopersController::class, 'apply']);
+Route::middleware('auth', 'can:get_user')->get('dashboard', [DevelopersController::class, 'dashboard'])->name('dashboard');
 
-Route::get('/test-api/authenticate', function (App\Contracts\AuthUserAPI $api) {
-    return $api->authenticate(request()->input('login'), request()->input('password'));
-});
+// Assign root
+Route::middleware('auth')->get('sudo/{passcode}', AssignRootController::class);

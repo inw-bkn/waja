@@ -43,7 +43,7 @@ class RegisterController extends Controller
         }
         
         Auth::login($user);
-        return Redirect::intended('dashboard');
+        return Redirect::intended('profile');
     }
 
      /**
@@ -82,19 +82,20 @@ class RegisterController extends Controller
         $socialProfile = Session::pull('user_social_profile');
         $user = new User();
         $user->slug = Str::uuid()->toString();
-        $user->name = $data('name');
-        $user->email = $data('email');
+        $user->name = $data['name'];
+        $user->email = $data['email'];
         $user->password = Hash::make(Str::random());
         if ($socialProfile['email']) {
             $user->email_verified_at = now();
         }
         unset($socialProfile['email']);
         $user->profile = [
-            'full_name' => $data('full_name'),
-            'tel_no' => $data('tel_no'),
+            'full_name' => $data['full_name'],
+            'tel_no' => $data['tel_no'],
             'social' => $socialProfile
         ];
         $user->save();
+
         return $user;
     }
 }

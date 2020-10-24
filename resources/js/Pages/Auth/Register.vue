@@ -97,10 +97,10 @@ created () {
 methods: {
     register () {
         this.busy = true
-        this.$inertia.post(`${this.$page.props.app.baseUrl}/register`, this.user)
-            .then(response => {
-                this.busy = false
-            })
+        this.$inertia.post(`${this.$page.props.app.baseUrl}/register`, this.user, {
+            onSuccess: () => this.busy = false
+
+        })
     }
 }
 }

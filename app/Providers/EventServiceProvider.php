@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\DeveloperRoleRequested;
+use App\Listeners\SendDeveloperRoleRequestNotification;
 use App\Listeners\UserRegistered;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -19,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             UserRegistered::class,
         ],
+        DeveloperRoleRequested::class => [
+            SendDeveloperRoleRequestNotification::class
+        ]
     ];
 
     /**
