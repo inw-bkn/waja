@@ -11,7 +11,7 @@ class DevelopersController extends Controller
 {
     public function developer()
     {
-        if (Request::user()->roles->contains('developer') || Request::user()->roles->contains('root')) {
+        if (Request::user()->rolesName()->contains('developer') || Request::user()->rolesName()->contains('root')) {
             return Redirect::route('dashboard');
         }
         return Inertia::render('Developer', ['latestForm' => DeveloperRequestForm::whereRequester(Request::user()->id)->latest()->first()]);
@@ -29,6 +29,11 @@ class DevelopersController extends Controller
 
     public function dashboard()
     {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Dashboard', [
+            'requestForms' => Request::user()->rolesName()->contains('root') ?
+                                DeveloperRequestForm::whereRaw('created_at = updated_at')->get() :
+                                [],
+            'tokens' => Request::user()->tokens->map->only(['id', 'name', 'abilities']),
+        ]);
     }
 }

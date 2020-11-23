@@ -19,7 +19,7 @@ class RegisterController extends Controller
 {
     public function showRegisterForm()
     {
-        if (!($socialProfile = Session::get('user_social_profile'))) {
+        if (!($socialProfile = Session::get('userSocialProfile'))) {
             return Redirect::route('login');
         }
 
@@ -79,7 +79,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $socialProfile = Session::pull('user_social_profile');
+        $socialProfile = Session::pull('userSocialProfile');
         $user = new User();
         $user->slug = Str::uuid()->toString();
         $user->name = $data['name'];

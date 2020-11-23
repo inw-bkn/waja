@@ -86,4 +86,14 @@ class User extends Authenticatable
             return $this->roles->map->abilities->flatten()->pluck('name')->unique();   
         });
     }
+
+    /**
+     * A user may has many bots.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function bots()
+    {
+        return $this->belongsToMany(Bot::class)->withTimestamps();
+    }
 }

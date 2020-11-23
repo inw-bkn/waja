@@ -7,7 +7,6 @@ use App\APIs\TelegramAuthUserAPI;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Exception;
-// use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
@@ -78,6 +77,10 @@ class LoginController extends Controller
                          ->where('profile->social->id', $user->getId())
                          ->first();
 
+        if (Session::has('linkSocialUserId')) {
+            return $this->linkSocial($provider, $user, $userExist);
+        }
+
         if ($userExist) {
             // UPDATE USER SOCIAL PROFILE NOT YET IMPLEMENT
             
@@ -89,7 +92,7 @@ class LoginController extends Controller
             return Redirect::intended('profile');
         }
 
-        Session::put('user_social_profile', [
+        Session::put('userSocialProfile', [
             'provider' => $provider,
             'id' => $user->getId(),
             'name' => $user->getName(),
@@ -99,5 +102,39 @@ class LoginController extends Controller
         ]);
             
         return Redirect::route('register');
+    }
+
+    protected function linkSocial($provider, $userSocial, $userExist = null)
+    {
+        $slug = Session::pull('linkSocialUserId');
+        $user = User::whereSlug($slug)->first();
+        if (! $user) {
+            abort(401);
+        }
+
+        $profile = $user->profile;
+        
+        if ($userExist) {
+            $profile['old_slug'] = $userExist->slug;
+            $userExist->delete();
+        }
+
+        if ($email = $userSocial->getEmail()) {
+            $user->email = $email;
+            $user->email_verified_at = now();
+        }
+        
+        $profile['social'] = [
+            'provider' => $provider,
+            'id' => $userSocial->getId(),
+            'name' => $userSocial->getName(),
+            'avatar' => $userSocial->getAvatar(),
+            'nickname' => $userSocial->getNickname(),         
+        ];
+        $user->profile = $profile;
+        $user->save();
+
+        Auth::login($user);
+        return Redirect::route('profile');
     }
 }

@@ -16,3 +16,19 @@
         * needs api to query user by slug
         * 
     + sdfsdf
+
+- waja senarios
+    + user auth
+        * register if needed (same person may use defference SNS)
+        * rederect if needed
+        * login user
+
+- ajaw senarios
+    + user auth
+        * register if needed (duplicate login proof)
+            - register with waja
+        * rederect if needed
+        * login user
+    + link social
+        * user login if needed
+        * user select provider

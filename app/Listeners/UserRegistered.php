@@ -26,6 +26,6 @@ class UserRegistered
      */
     public function handle(Registered $event)
     {
-        \Log::info($event->user->profile['social']['avatar']);
+        \Log::info($event->user->profile);
     }
 }

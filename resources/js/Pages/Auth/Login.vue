@@ -45,16 +45,15 @@ export default {
 components: { IconFacebook, IconGithub, IconGoogle, IconLine, IconTwitter },
 props: ["configs"],
 mounted () {
-    const script = document.createElement('script')
+    const script = document.createElement("script")
     script.async = true
     script.src = "https://telegram.org/js/telegram-widget.js?12"
+    script.setAttribute('data-radius', "0")
     script.setAttribute("data-size", "large")
     script.setAttribute("data-userpic", false)
-    script.setAttribute("data-userpic", false)
-    script.setAttribute("data-telegram-login", this.configs.telegram.client_id)
     script.setAttribute("data-request-access", null)
-    script.setAttribute('data-radius', "0")
     script.setAttribute('data-auth-url', this.configs.telegram.redirect)
+    script.setAttribute("data-telegram-login", this.configs.telegram.client_id)
     this.$refs.telegram.appendChild(script)
 },
 }

@@ -26,6 +26,7 @@ Route::middleware('auth')->post('logout', [LoginController::class, 'logout']);
 
 // User features
 Route::middleware('auth')->get('profile', [UsersController::class, 'profile'])->name('profile');
+Route::middleware('guest', 'signed')->get('link-social', [UsersController::class, 'linkSocial'])->name('linkSocial');
 // Route::middleware('auth')->get('dashboard', [UsersController::class, 'dashboard'])->name('dashboard');
 
 // Developer features
