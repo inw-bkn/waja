@@ -1,25 +1,25 @@
 .btn {
-    @apply .p-4 .font-medium .text-lg .text-gray-200 .shadow .transition-all .duration-300 .ease-in-out;
+    @apply p-4 font-medium text-lg text-gray-200 shadow transition-all duration-300 ease-in-out;
 }
 
 .btn:disabled {
-    @apply .opacity-50 .cursor-not-allowed;
+    @apply opacity-50 cursor-not-allowed;
 }
 
 .btn-teal {
-    @apply .bg-teal-500;
+    @apply bg-teal-500;
 }
 
 .btn-teal:hover:not([disabled]) {
-    @apply .bg-teal-400;
+    @apply bg-teal-400;
 }
 
 .btn-blue {
-    @apply .bg-blue-500;
+    @apply bg-blue-500;
 }
 
 .btn-blue:hover:not([disabled]) {
-    @apply .bg-blue-400;
+    @apply bg-blue-400;
 }
 
 .btn-spinner,
